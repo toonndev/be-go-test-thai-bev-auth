@@ -24,10 +24,11 @@ func main() {
 	}
 
 	userRepo := repository.NewUserRepository(db)
-	authSvc := service.NewAuthService(userRepo)
+	blacklistRepo := repository.NewTokenBlacklistRepository(db)
+	authSvc := service.NewAuthService(userRepo, blacklistRepo)
 	authHandler := handler.NewAuthHandler(authSvc)
 
-	r := router.Setup(authHandler)
+	r := router.Setup(authHandler, blacklistRepo)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {

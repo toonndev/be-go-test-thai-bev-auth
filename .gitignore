@@ -10,9 +10,7 @@ tmp/
 *.test
 *.out
 
-# Environment variables
-.env
-.env.*
+
 
 # IDE
 .vscode/

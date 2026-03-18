@@ -15,6 +15,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var ErrLogoutFailed = errors.New("logout failed")
+
 var (
 	ErrPasswordMismatch  = errors.New("password and confirm_password do not match")
 	ErrUsernameExists    = errors.New("username already exists")
@@ -24,14 +26,16 @@ var (
 type AuthService interface {
 	Register(req *dto.RegisterRequest) error
 	Login(req *dto.LoginRequest) (*dto.LoginResponse, error)
+	Logout(token string, exp time.Time) error
 }
 
 type authService struct {
-	userRepo repository.UserRepository
+	userRepo       repository.UserRepository
+	blacklistRepo  repository.TokenBlacklistRepository
 }
 
-func NewAuthService(userRepo repository.UserRepository) AuthService {
-	return &authService{userRepo: userRepo}
+func NewAuthService(userRepo repository.UserRepository, blacklistRepo repository.TokenBlacklistRepository) AuthService {
+	return &authService{userRepo: userRepo, blacklistRepo: blacklistRepo}
 }
 
 func (s *authService) Register(req *dto.RegisterRequest) error {
@@ -79,6 +83,13 @@ func (s *authService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 		Token:    token,
 		Username: user.Username,
 	}, nil
+}
+
+func (s *authService) Logout(token string, exp time.Time) error {
+	if err := s.blacklistRepo.Add(token, exp); err != nil {
+		return ErrLogoutFailed
+	}
+	return nil
 }
 
 func generateJWT(username string) (string, error) {

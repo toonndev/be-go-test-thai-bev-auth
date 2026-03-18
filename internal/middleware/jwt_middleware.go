@@ -5,11 +5,13 @@ import (
 	"os"
 	"strings"
 
+	"be-go-test-thai-bev-auth/internal/repository"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func JWTMiddleware() gin.HandlerFunc {
+func JWTMiddleware(blacklistRepo repository.TokenBlacklistRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
@@ -18,6 +20,13 @@ func JWTMiddleware() gin.HandlerFunc {
 		}
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+		blacklisted, err := blacklistRepo.IsBlacklisted(tokenStr)
+		if err != nil || blacklisted {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
 		secret := os.Getenv("JWT_SECRET")
 
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
@@ -39,6 +48,8 @@ func JWTMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("username", claims["sub"])
+		c.Set("token", tokenStr)
+		c.Set("token_exp", claims["exp"])
 		c.Next()
 	}
 }

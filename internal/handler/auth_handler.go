@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"be-go-test-thai-bev-auth/internal/dto"
 	"be-go-test-thai-bev-auth/internal/service"
@@ -64,4 +65,21 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func (h *AuthHandler) Me(c *gin.Context) {
 	username, _ := c.Get("username")
 	c.JSON(http.StatusOK, gin.H{"username": username})
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	tokenStr, _ := c.Get("token")
+	expRaw, _ := c.Get("token_exp")
+
+	exp := time.Now().Add(24 * time.Hour)
+	if expFloat, ok := expRaw.(float64); ok {
+		exp = time.Unix(int64(expFloat), 0)
+	}
+
+	if err := h.authService.Logout(tokenStr.(string), exp); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }

@@ -3,12 +3,13 @@ package router
 import (
 	"be-go-test-thai-bev-auth/internal/handler"
 	"be-go-test-thai-bev-auth/internal/middleware"
+	"be-go-test-thai-bev-auth/internal/repository"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func Setup(authHandler *handler.AuthHandler) *gin.Engine {
+func Setup(authHandler *handler.AuthHandler, blacklistRepo repository.TokenBlacklistRepository) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -17,13 +18,16 @@ func Setup(authHandler *handler.AuthHandler) *gin.Engine {
 		AllowHeaders: []string{"Content-Type", "Authorization"},
 	}))
 
+	jwtMiddleware := middleware.JWTMiddleware(blacklistRepo)
+
 	v1 := r.Group("/api/v1")
 	{
 		auth := v1.Group("/auth")
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
-			auth.GET("/me", middleware.JWTMiddleware(), authHandler.Me)
+			auth.GET("/me", jwtMiddleware, authHandler.Me)
+			auth.POST("/logout", jwtMiddleware, authHandler.Logout)
 		}
 	}
 

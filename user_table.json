@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "username": "testt",
+    "password": "$2a$12$WsShSsZBR0HTOQpJitatVOab39fySpa2YpQAbNaWl/IpOJPiCKcKq",
+    "created_at": "2026-03-18 08:12:39.218592+00",
+    "updated_at": "2026-03-18 08:12:39.218592+00"
+  },
+  {
+    "id": "2",
+    "username": "123456789",
+    "password": "$2a$12$0RR1A7u9ZlYAwynzI5UBpeAs2MmY9RmP4rxAITVAGkwDTRjFsoM4S",
+    "created_at": "2026-03-18 08:27:31.184003+00",
+    "updated_at": "2026-03-18 08:27:31.184003+00"
+  }
+]
