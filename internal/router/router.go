@@ -1,6 +1,8 @@
 package router
 
 import (
+	"os"
+
 	"be-go-test-thai-bev-auth/internal/handler"
 	"be-go-test-thai-bev-auth/internal/middleware"
 
@@ -9,6 +11,10 @@ import (
 )
 
 func Setup(authHandler *handler.AuthHandler) *gin.Engine {
+	if os.Getenv("GIN_MODE") == "" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
