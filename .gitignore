@@ -1,0 +1,27 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+tmp/
+
+# Go build cache
+*.test
+*.out
+
+# Environment variables
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Air (live reload)
+.air.toml
+
+# Go modules download cache
+vendor/
+
+CLAUDE.md
